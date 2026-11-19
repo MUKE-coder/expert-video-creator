@@ -1,0 +1,10 @@
+{
+  "name": "expert-video-creator",
+  "description": "Ten Claude skills that turn an idea, a live web app or a GitHub repo into a finished demo or explainer video: a director that runs discovery (ask-tool interview), app-tester (browses and captures your app or repo), storyboard, asset-builder, voiceover and captions, sound (generated music + SFX), editor (data-driven Remotion template with terminal, code, screenshot, flow and schema scenes in any aspect ratio) and an independent critic, then renders an MP4.",
+  "version": "0.1.0",
+  "author": {"name": "MUKE JOHNBAPTIST", "url": "https://jb.desishub.com"},
+  "homepage": "https://github.com/MUKE-coder/expert-video-creator",
+  "repository": "https://github.com/MUKE-coder/expert-video-creator",
+  "license": "MIT",
+  "keywords": ["video", "remotion", "demo", "explainer", "screenshots", "storyboard", "ffmpeg", "captions", "music", "devrel"]
+}

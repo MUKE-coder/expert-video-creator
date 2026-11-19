@@ -1,0 +1,145 @@
+{
+ "width": 1920,
+ "height": 1080,
+ "fps": 30,
+ "transitionFrames": 12,
+ "captions": false,
+ "scenes": [
+  {
+   "kind": "question",
+   "duration": 9,
+   "n": 1,
+   "question": "What is Acme?",
+   "answer": "A CLI that ships your app in one command.",
+   "highlight": "one command",
+   "sub": "Example data: replace this file with your storyboard.",
+   "chips": [
+    "Node",
+    "Docker",
+    "Postgres"
+   ]
+  },
+  {
+   "kind": "terminal",
+   "duration": 9,
+   "n": 2,
+   "question": "How do I start?",
+   "window": "acme-app \u2014 zsh",
+   "steps": [
+    {
+     "cmd": "npm i -g acme-cli"
+    },
+    {
+     "cmd": "acme new acme-app --template web",
+     "out": [
+      "\u2713 project created"
+     ]
+    },
+    {
+     "cmd": "cd acme-app && acme dev",
+     "nextDir": "acme-app",
+     "out": [
+      "\u2713 ready on http://localhost:3000"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "code",
+   "duration": 6,
+   "n": 3,
+   "question": "What does it generate?",
+   "file": "src/models/user.ts",
+   "lang": "ts",
+   "highlight": [
+    4
+   ],
+   "code": "export interface User {\n  id: string;\n  email: string;\n  teamId: string; // belongs to Team\n  createdAt: Date;\n}"
+  },
+  {
+   "kind": "schema",
+   "duration": 6.5,
+   "n": 4,
+   "question": "How is the data shaped?",
+   "answer": "Two tables, one relation.",
+   "highlight": "one relation",
+   "tables": [
+    {
+     "name": "users",
+     "fields": [
+      [
+       "id",
+       "uuid"
+      ],
+      [
+       "email",
+       "string"
+      ],
+      [
+       "team_id",
+       "FK \u2192 teams",
+       true
+      ]
+     ]
+    },
+    {
+     "name": "teams",
+     "fields": [
+      [
+       "id",
+       "uuid"
+      ],
+      [
+       "name",
+       "string"
+      ]
+     ]
+    }
+   ],
+   "relations": [
+    {
+     "from": "users.team_id",
+     "to": "teams.id",
+     "label": "belongs_to"
+    }
+   ]
+  },
+  {
+   "kind": "bullets",
+   "duration": 6.5,
+   "title": "Why teams pick it",
+   "items": [
+    "Zero-config deploys",
+    "Preview URL per branch",
+    "Rollback in one click"
+   ]
+  },
+  {
+   "kind": "cheatsheet",
+   "duration": 4.5,
+   "n": 5,
+   "question": "What should I remember?",
+   "rows": [
+    {
+     "cmd": "acme new <name>",
+     "note": "scaffold"
+    },
+    {
+     "cmd": "acme dev",
+     "note": "run locally"
+    },
+    {
+     "cmd": "acme deploy --prod",
+     "note": "ship it"
+    }
+   ]
+  },
+  {
+   "kind": "outro",
+   "duration": 3,
+   "title": "acme",
+   "tagline": "Ship your app in one command.",
+   "url": "acme.example"
+  }
+ ]
+}

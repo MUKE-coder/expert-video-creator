@@ -1,0 +1,28 @@
+{
+  "bg": "#000000",
+  "fg": "#EDEDED",
+  "muted": "#8F8F8F",
+  "dim": "#5E5E5E",
+  "border": "#2A2A2A",
+  "surface": "#0A0A0A",
+  "surface2": "#111111",
+  "accent": "#FFFFFF",
+  "radius": 14,
+  "fontSans": "Geist",
+  "fontMono": "Geist Mono",
+  "backdrop": "grid-glow",
+  "motion": "calm",
+  "dark": true,
+  "preset": "mono",
+  "syntax": {
+    "cmd": "#52A8FF",
+    "flag": "#BF7AF0",
+    "str": "#62C073",
+    "type": "#F5A524",
+    "op": "#FF6166",
+    "kw": "#FF4D8D",
+    "comment": "#8F8F8F",
+    "dir": "#3DD6C9",
+    "ok": "#62C073"
+  }
+}

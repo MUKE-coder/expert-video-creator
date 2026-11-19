@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "expert-video-creator",
+  "description": "The expert video pack for Claude: demo and explainer videos from an idea, an app or a repo",
+  "owner": {"name": "MUKE JOHNBAPTIST", "url": "https://jb.desishub.com"},
+  "plugins": [
+    {
+      "name": "expert-video-creator",
+      "description": "A director and nine experts (discovery, app-tester, storyboard, asset-builder, voiceover, sound, editor, critic, references) that interview you, capture your product, and render a finished video with Remotion.",
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/MUKE-coder/expert-video-creator"
+    }
+  ]
+}
