@@ -15,11 +15,13 @@ export const Captions: React.FC = () => {
   const pages = ((data as {pages?: Page[]}).pages ?? []) as Page[];
   const page = pages.find((p) => ms >= p.startMs - 60 && ms <= p.endMs + 250);
   if (!page) return null;
+  // exactly one highlighted word: the latest one that has started
+  const current = page.words.reduce((c, w, i) => (ms >= w.startMs ? i : c), -1);
   return (
     <div style={{position: 'absolute', left: L.margin, right: L.margin, bottom: L.vertical ? L.safeBottom + 40 : 56, display: 'flex', justifyContent: 'center'}}>
       <div style={{fontFamily: SANS, fontWeight: 600, fontSize: L.fs(40, 52), lineHeight: 1.25, textAlign: 'center', background: 'rgba(0,0,0,0.72)', color: '#FFF', padding: '12px 26px', borderRadius: 14, letterSpacing: '-0.01em', maxWidth: L.contentW}}>
         {page.words.map((w, i) => (
-          <span key={i} style={{color: ms >= w.startMs && ms <= w.endMs + 80 ? (T.accent.toUpperCase() === '#FFFFFF' ? '#FFE15C' : T.accent) : '#FFF'}}>
+          <span key={i} style={{color: i === current && ms <= w.endMs + 200 ? (T.accent.toUpperCase() === '#FFFFFF' ? '#FFE15C' : T.accent) : '#FFF'}}>
             {(i ? ' ' : '') + w.text}
           </span>
         ))}

@@ -8,6 +8,7 @@ The track is written for the exact duration (fade in 1.5 s, fade out 3 s) and lo
 later by mix.py. Everything is synthesised here, so the result is free to use anywhere.
 """
 import argparse
+from pathlib import Path
 
 import numpy as np
 from scipy.io import wavfile
@@ -151,6 +152,7 @@ def main():
     mix = mix + wet[:, ::-1]
     mix *= (np.minimum(1, t / 1.5) * np.minimum(1, (dur - t) / 3.0))[:, None]
     mix /= np.max(np.abs(mix)) + 1e-9
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     wavfile.write(a.out, SR, (mix * 0.85 * 32767).astype(np.int16))
     print(f"wrote {a.out}  ({a.mood}, {bpm:.0f} bpm, key {a.key}, {dur:.1f}s)")
 

@@ -87,6 +87,7 @@ def main():
     graph.append("".join(fg) + f"amix=inputs={len(fg)}:normalize=0:duration=first,atrim=0:{a.duration},"
                  f"loudnorm=I={a.target}:TP=-1.5:LRA=11[out]")
 
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", ";".join(graph), "-map", "[out]",
          "-ar", "48000", "-ac", "2", a.out])
     print(f"wrote {a.out}  (target {a.target} LUFS; {len(vo_labels)} VO lines, {len(sfx_labels)} SFX cues)")

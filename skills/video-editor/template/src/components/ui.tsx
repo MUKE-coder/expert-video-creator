@@ -115,7 +115,8 @@ export const Window: React.FC<{title?: React.ReactNode; width: number; height?: 
 export const Question: React.FC<{n?: number | string; text: string; liftAt: number; liftTo?: number; endSize?: number}> = ({n, text, liftAt, liftTo, endSize}) => {
   const f = useCurrentFrame();
   const L = useLayout();
-  const enter = useEnter(0, 20);
+  // enters after the scene's crossfade (12 frames) is mostly done, so it never lands on the outgoing scene
+  const enter = useEnter(8, 20);
   const lift = tween(f, liftAt, liftAt + 18);
   const big = L.fs(120, 96);
   const small = endSize ?? L.fs(60, 64);

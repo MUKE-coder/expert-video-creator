@@ -191,7 +191,8 @@ const Shot: React.FC<{cap: Capture; focusIdx?: number | string; maxW: number; ma
   // horizontal pan so the focus sits in the middle of the cropped window
   const panX = cover ? Math.min(0, Math.max(w - imgW, w / 2 - (fbox ? fbox.x + fbox.w / 2 : imgW / 2))) : 0;
   const box = fbox ? {...fbox, x: fbox.x + panX} : null;
-  const z0 = zoom ?? (box ? Math.min(1.6, Math.max(1.08, (w * 0.62) / Math.min(box.w, w))) : 1.06);
+  // auto-zoom: enough to make the focus read, never past 1.35× (captures blur and context is lost)
+  const z0 = zoom ?? (box ? Math.min(1.35, Math.max(1.06, (w * 0.62) / Math.min(box.w, w))) : 1.04);
   const zp = tween(f, at + 10, at + 55);
   const z = interpolate(zp, [0, 1], [1, z0]);
   const ox = box ? box.x + box.w / 2 : w / 2;
@@ -231,7 +232,10 @@ const Shot: React.FC<{cap: Capture; focusIdx?: number | string; maxW: number; ma
         {img}
       </Window>
     );
-  const callTop = box ? Math.min(h - 40, oy + (box.h * z) / 2 + 30) + chrome : 0;
+  // callout below the focus box; flips above it when there is no room below
+  const below = oy + (box ? (box.h * z0) / 2 : 0) + 30;
+  const above = oy - (box ? (box.h * z0) / 2 : 0) - 90;
+  const callTop = (box ? (below + 70 < h ? below : Math.max(10, above)) : h - 90) + chrome;
   return (
     <div style={{position: 'relative'}}>
       {framed}
@@ -427,7 +431,7 @@ const CheatsheetScene: React.FC<SceneProps> = (p) => {
                 <FadeUp key={r.cmd} at={38 + i * 5} dist={10}>
                   <div style={{display: L.vertical ? 'block' : 'flex', alignItems: 'center', padding: L.vertical ? '14px 36px' : '14px 44px', fontFamily: MONO, fontSize: fs, whiteSpace: 'pre'}}>
                     <span style={{display: 'inline-block', width: L.vertical ? undefined : cmdW}}>
-                      <span style={{color: T.muted}}>$ </span>
+                      {!r.cmd.startsWith('#') && <span style={{color: T.muted}}>$ </span>}
                       {highlightShell(r.cmd).map(([t, c], j) => (
                         <span key={j} style={{color: c}}>{t}</span>
                       ))}
@@ -461,8 +465,18 @@ const OutroScene: React.FC<SceneProps> = (p) => {
           {p.tagline}
         </FadeUp>
       )}
+      {p.cta && (
+        <FadeUp at={16} style={{marginTop: 54}}>
+          <div style={{fontFamily: MONO, fontSize: L.fs(30, 26), background: T.surface, border: `1px solid ${T.border}`, borderRadius: T.radius, padding: '20px 34px', whiteSpace: 'pre', maxWidth: L.contentW, overflow: 'hidden'}}>
+            <span style={{color: T.muted}}>$ </span>
+            {highlightShell(p.cta).map(([t, c], j) => (
+              <span key={j} style={{color: c}}>{t}</span>
+            ))}
+          </div>
+        </FadeUp>
+      )}
       {p.url && (
-        <FadeUp at={18} style={{marginTop: 50}}>
+        <FadeUp at={p.cta ? 26 : 18} style={{marginTop: p.cta ? 30 : 50}}>
           <Pill style={{fontSize: L.fs(26, 30), padding: '14px 30px'}}>{p.url}</Pill>
         </FadeUp>
       )}

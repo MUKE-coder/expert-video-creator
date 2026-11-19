@@ -15,7 +15,7 @@ terms so the editor can build most of a video from data alone.
 | `schema` | Tables/entities with fields and a drawn relation line | 6–7 s | `tables[], relations[]` |
 | `bullets` | Up to 4 short points, staggered | 4–6 s | `title, items[]` |
 | `cheatsheet` | Commands with `# comments` in a window | 4–5 s | `rows[] {cmd, note}` |
-| `outro` | Wordmark, tagline, URL pill / CTA | 2–3 s | `title, tagline, url` |
+| `outro` | Wordmark, tagline, highlighted install command, URL pill | 3–6 s | `title, tagline, cta, url, logo` |
 
 ## Story structures
 
