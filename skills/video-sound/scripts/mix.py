@@ -31,6 +31,7 @@ def main():
     ap.add_argument("--cues")
     ap.add_argument("--vo")
     ap.add_argument("--target", type=float, default=-16)
+    ap.add_argument("--tp", type=float, default=-2.0, help="true-peak ceiling (single-pass loudnorm can overshoot ~0.5 dB)")
     ap.add_argument("--out", default=".video/audio/mix.wav")
     a = ap.parse_args()
 
@@ -85,7 +86,7 @@ def main():
     fg += [f"[{l}]" for l in sfx_labels]
     fg.insert(0, "[base]")
     graph.append("".join(fg) + f"amix=inputs={len(fg)}:normalize=0:duration=first,atrim=0:{a.duration},"
-                 f"loudnorm=I={a.target}:TP=-1.5:LRA=11[out]")
+                 f"loudnorm=I={a.target}:TP={a.tp}:LRA=11,alimiter=limit={10 ** ((a.tp - 0.3) / 20):.4f}:level=disabled[out]")
 
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", ";".join(graph), "-map", "[out]",

@@ -19,6 +19,10 @@ MAX_WORDS, MAX_CHARS = 6, 42
 def paginate(words):
     pages, cur = [], []
     for w in words:
+        # never let one page span a pause (separate lines / scenes)
+        if cur and w["startMs"] - cur[-1]["endMs"] > 700:
+            pages.append(cur)
+            cur = []
         cand = cur + [w]
         text = " ".join(x["text"] for x in cand)
         if cur and (len(cand) > MAX_WORDS or len(text) > MAX_CHARS):
@@ -31,6 +35,16 @@ def paginate(words):
             cur = []
     if cur:
         pages.append(cur)
+    # no orphans: fold a 1–2 word page into the page before it when they belong to the same line
+    merged = []
+    for pg in pages:
+        prev = merged[-1] if merged else None
+        if prev and len(pg) <= 2 and pg[0]["startMs"] - prev[-1]["endMs"] <= 700 \
+                and len(" ".join(x["text"] for x in prev + pg)) <= MAX_CHARS + 12:
+            prev.extend(pg)
+        else:
+            merged.append(pg)
+    pages = merged
     return [{"text": " ".join(w["text"] for w in p), "startMs": p[0]["startMs"], "endMs": p[-1]["endMs"],
              "words": [{"text": w["text"], "startMs": w["startMs"], "endMs": w["endMs"]} for w in p]} for p in pages]
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
-import {MONO, SANS, T} from '../lib/theme';
+import {HW, MONO, SANS, T} from '../lib/theme';
 import {tween, useLayout} from '../lib/anim';
 import {highlightCode, highlightShell} from '../lib/highlight';
-import {Answer, Cursor, FadeUp, Pill, Question, Window} from '../components/ui';
+import {Answer, Cursor, FadeUp, Mark, Pill, Question, Window} from '../components/ui';
 import {Terminal, scheduleLines} from '../components/Terminal';
 import manifestRaw from '../data/manifest.json';
 import {CUSTOM} from '../custom';
@@ -25,7 +25,7 @@ const Header: React.FC<{p: SceneProps; liftAt?: number}> = ({p, liftAt = 24}) =>
   if (p.question) return <Question n={p.n} text={p.question} liftAt={liftAt} liftTo={p.liftTo} endSize={L.fs(52, 60)} />;
   if (p.title)
     return (
-      <FadeUp at={0} style={{position: 'absolute', left: L.margin, right: L.margin, top: L.vertical ? L.safeTop : 70, textAlign: 'center', fontFamily: SANS, fontWeight: 600, fontSize: L.fs(56, 64), letterSpacing: '-0.04em', color: T.fg}}>
+      <FadeUp at={8} style={{position: 'absolute', left: L.margin, right: L.margin, top: L.vertical ? L.safeTop : 70, textAlign: 'center', fontFamily: SANS, fontWeight: HW, fontSize: L.fs(56, 64), letterSpacing: '-0.04em', color: T.fg}}>
         {p.title}
       </FadeUp>
     );
@@ -36,7 +36,7 @@ const contentTop = (p: SceneProps, L: ReturnType<typeof useLayout>) => (p.questi
 const centerTop = (p: SceneProps, L: ReturnType<typeof useLayout>, h: number) => {
   const t0 = contentTop(p, L);
   const avail = L.H - t0 - (L.vertical ? L.safeBottom : 70);
-  return t0 + Math.max(0, (avail - h) * (L.vertical ? 0.3 : 0.45));
+  return t0 + Math.max(0, (avail - h) * 0.45);
 };
 const Centered: React.FC<{top: number; children: React.ReactNode}> = ({top, children}) => (
   <div style={{position: 'absolute', left: 0, right: 0, top, display: 'flex', justifyContent: 'center'}}>{children}</div>
@@ -46,10 +46,10 @@ const Centered: React.FC<{top: number; children: React.ReactNode}> = ({top, chil
 const QuestionScene: React.FC<SceneProps> = (p) => {
   const L = useLayout();
   const liftAt = p.liftAt ?? 30;
-  const answerTop = L.vertical ? 700 : p.chips ? 480 : 530;
+  const answerTop = L.vertical ? 860 : p.chips ? 480 : 530;
   return (
     <AbsoluteFill>
-      <Question n={p.n} text={p.question} liftAt={p.answer ? liftAt : Infinity} liftTo={L.vertical ? 420 : 270} />
+      <Question n={p.n} text={p.question} liftAt={p.answer ? liftAt : Infinity} liftTo={L.vertical ? 560 : 270} />
       {p.answer && (
         <Answer at={liftAt + 12} top={answerTop} text={p.answer} highlight={p.highlight} sub={p.sub}>
           {p.chips && (
@@ -74,7 +74,7 @@ const TitleScene: React.FC<SceneProps> = (p) => {
     <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', padding: L.margin}}>
       {p.logo && (
         <FadeUp at={0}>
-          <Img src={staticFile(p.logo)} style={{height: L.fs(120, 140), marginBottom: 40}} />
+          <Img src={staticFile(p.logo)} style={{height: p.logoHeight ?? L.fs(120, 140), marginBottom: 40}} />
         </FadeUp>
       )}
       <FadeUp at={4} style={{fontFamily: SANS, fontWeight: 700, fontSize: L.fs(150, 140), letterSpacing: '-0.06em', color: T.dark ? '#FFF' : T.fg, lineHeight: 1, textAlign: 'center'}}>
@@ -167,7 +167,7 @@ const CodeScene: React.FC<SceneProps> = (p) => {
 };
 
 /* ── screenshot (browser / phone frame, zoom to focus, highlight, callout, cursor) ── */
-const Shot: React.FC<{cap: Capture; focusIdx?: number | string; maxW: number; maxH: number; at: number; zoom?: number; callout?: string; url?: string; device?: string; cursor?: boolean; label?: boolean}> = ({cap, focusIdx = 0, maxW, maxH, at, zoom, callout, url, device = 'browser', cursor, label = true}) => {
+const Shot: React.FC<{cap: Capture; focusIdx?: number | string; maxW: number; maxH: number; at: number; zoom?: number; callout?: string; url?: string; device?: string; cursor?: boolean; label?: boolean; fit?: 'cover' | 'contain'}> = ({cap, focusIdx = 0, maxW, maxH, at, zoom, callout, url, device = 'browser', cursor, label = true, fit}) => {
   const f = useCurrentFrame();
   const L = useLayout();
   const scale = cap.scale ?? 2;
@@ -175,7 +175,7 @@ const Shot: React.FC<{cap: Capture; focusIdx?: number | string; maxW: number; ma
   const aspect = cap.w / cap.h;
   const chrome = device === 'none' ? 0 : device === 'phone' ? 0 : 54;
   // Vertical video + landscape capture: a tall window that crops around the focus (re-layout, not shrink).
-  const cover = L.vertical && aspect > 1 && device !== 'phone';
+  const cover = fit !== 'contain' && L.vertical && aspect > 1 && device !== 'phone';
   let w = Math.min(maxW, (maxH - chrome) * aspect);
   if (device === 'phone') w = Math.min(w, maxH * aspect);
   let h = w / aspect;
@@ -253,12 +253,15 @@ const ScreenshotScene: React.FC<SceneProps> = (p) => {
   const top = contentTop(p, L);
   const cap = findCapture(p.capture);
   const maxH = L.H - top - (L.vertical ? L.safeBottom : 60);
+  const capAspect = cap.w / cap.h;
+  const estH = Math.min(maxH, (p.width ?? L.contentW) / capAspect + (p.device === 'none' || p.device === 'phone' ? 0 : 54));
+  const shotTop = L.vertical ? centerTop(p, L, estH) : top;
   return (
     <AbsoluteFill>
       <Header p={p} />
-      <Centered top={top}>
+      <Centered top={shotTop}>
         <FadeUp at={p.question ? 34 : 4} dist={30}>
-          <Shot cap={cap} focusIdx={p.focus} maxW={p.width ?? L.contentW} maxH={maxH} at={p.question ? 34 : 4} zoom={p.zoom} callout={p.callout} url={p.url} device={p.device} cursor={p.cursor} />
+          <Shot cap={cap} focusIdx={p.focus} maxW={p.width ?? L.contentW} maxH={maxH} at={p.question ? 34 : 4} zoom={p.zoom} callout={p.callout} url={p.url} device={p.device} cursor={p.cursor} fit={p.fit} />
         </FadeUp>
       </Centered>
     </AbsoluteFill>
@@ -388,7 +391,7 @@ const SchemaScene: React.FC<SceneProps> = (p) => {
 /* ── bullets ──────────────────────────────────────────────── */
 const BulletsScene: React.FC<SceneProps> = (p) => {
   const L = useLayout();
-  const top = centerTop(p, L, (p.items as unknown[]).length * (L.vertical ? 150 : 120));
+  const top = centerTop(p, L, (p.items as unknown[]).length * (L.vertical ? 170 : 120));
   return (
     <AbsoluteFill>
       <Header p={p} />
@@ -397,13 +400,13 @@ const BulletsScene: React.FC<SceneProps> = (p) => {
           const o = typeof it === 'string' ? {text: it} : it;
           return (
             <FadeUp key={i} at={(p.question ? 40 : 10) + i * 8} dist={14}>
-              <div style={{display: 'flex', alignItems: 'center', gap: 26, width: Math.min(L.contentW, 1200), background: T.surface, border: `1px solid ${T.border}`, borderRadius: T.radius, padding: L.vertical ? '32px 36px' : '26px 34px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: 26, width: Math.min(L.contentW, 1200), background: T.surface, border: `1px solid ${T.border}`, borderRadius: T.radius, padding: L.vertical ? '40px 40px' : '26px 34px'}}>
                 {o.icon ? (
                   <Img src={staticFile(`assets/icons/${o.icon}.svg`)} style={{width: 40, height: 40, filter: T.dark ? 'invert(1)' : undefined}} />
                 ) : (
                   <span style={{fontFamily: MONO, fontSize: L.fs(24, 28), color: T.muted}}>0{i + 1}</span>
                 )}
-                <span style={{fontFamily: SANS, fontSize: L.fs(40, 44), color: T.fg, letterSpacing: '-0.02em', fontWeight: 500}}>{o.text}</span>
+                <span style={{fontFamily: SANS, fontSize: L.fs(40, 50), color: T.fg, letterSpacing: '-0.02em', fontWeight: 500, lineHeight: 1.2}}>{o.text}</span>
               </div>
             </FadeUp>
           );
@@ -455,7 +458,7 @@ const OutroScene: React.FC<SceneProps> = (p) => {
     <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', padding: L.margin}}>
       <FadeUp at={0} dist={10}>
         {p.logo ? (
-          <Img src={staticFile(p.logo)} style={{height: L.fs(160, 180)}} />
+          <Img src={staticFile(p.logo)} style={{height: p.logoHeight ?? L.fs(160, 180)}} />
         ) : (
           <div style={{fontFamily: SANS, fontWeight: 700, fontSize: L.fs(200, 180), letterSpacing: '-0.06em', color: T.dark ? '#FFF' : T.fg, lineHeight: 1, textAlign: 'center'}}>{p.title}</div>
         )}
@@ -484,6 +487,72 @@ const OutroScene: React.FC<SceneProps> = (p) => {
   );
 };
 
+
+/* ── stats: big numbers that count up ─────────────────────── */
+const StatsScene: React.FC<SceneProps> = (p) => {
+  const f = useCurrentFrame();
+  const L = useLayout();
+  const items: {value: number; prefix?: string; suffix?: string; label: string}[] = p.items;
+  const cols = L.vertical ? 1 : Math.min(4, items.length);
+  const cardH = L.vertical ? 230 : 300;
+  const gap = L.vertical ? 28 : 32;
+  const rows = Math.ceil(items.length / cols);
+  const top = centerTop(p, L, rows * cardH + (rows - 1) * gap);
+  const g = T.gradient && T.gradient.length > 1 ? `linear-gradient(90deg, ${T.gradient.join(', ')})` : undefined;
+  return (
+    <AbsoluteFill>
+      <Header p={p} />
+      <div style={{position: 'absolute', top, left: L.margin, right: L.margin, display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap}}>
+        {items.map((it, i) => {
+          const at = (p.question ? 36 : 8) + i * 7;
+          const c = tween(f, at, at + 30);
+          const n = Math.round(it.value * c);
+          return (
+            <FadeUp key={i} at={at} dist={18}>
+              <div style={{height: cardH, background: T.surface, border: `1px solid ${T.border}`, borderRadius: T.radius * 1.4, padding: L.vertical ? '30px 44px' : '34px 36px', display: 'flex', flexDirection: L.vertical ? 'row' : 'column', alignItems: L.vertical ? 'center' : 'flex-start', justifyContent: L.vertical ? 'flex-start' : 'center', gap: L.vertical ? 36 : 10, boxShadow: T.dark ? 'none' : '0 12px 40px rgba(15,23,42,0.06)'}}>
+                <div style={{fontFamily: SANS, fontWeight: HW, fontSize: L.vertical ? 120 : 104, letterSpacing: '-0.05em', lineHeight: 1, minWidth: L.vertical ? 330 : undefined, color: g ? 'transparent' : T.fg, backgroundImage: g, WebkitBackgroundClip: g ? 'text' : undefined, backgroundClip: g ? 'text' : undefined}}>
+                  {it.prefix ?? ''}{n.toLocaleString('en-US')}{it.suffix ?? ''}
+                </div>
+                <div style={{fontFamily: SANS, fontSize: L.fs(28, 40), color: T.muted, lineHeight: 1.25}}>{it.label}</div>
+              </div>
+            </FadeUp>
+          );
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ── quote: a client testimonial ──────────────────────────── */
+const QuoteScene: React.FC<SceneProps> = (p) => {
+  const L = useLayout();
+  const parts = p.highlight && String(p.quote).includes(p.highlight) ? String(p.quote).split(p.highlight) : [p.quote];
+  const initials = String(p.name).split(' ').map((w: string) => w[0]).join('').slice(0, 2);
+  return (
+    <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', padding: L.margin}}>
+      <FadeUp at={2} style={{fontFamily: SANS, fontWeight: HW, fontSize: L.fs(220, 260), lineHeight: 0.6, color: T.accent, height: L.fs(110, 130)}}>“</FadeUp>
+      <FadeUp at={8} style={{fontFamily: SANS, fontWeight: HW, fontSize: L.fs(72, 80), letterSpacing: '-0.035em', lineHeight: 1.15, color: T.fg, textAlign: 'center', textWrap: 'balance', maxWidth: L.contentW} as React.CSSProperties}>
+        {parts.length === 2 ? (
+          <>
+            {parts[0]}
+            <Mark at={30}>{p.highlight}</Mark>
+            {parts[1]}
+          </>
+        ) : (
+          p.quote
+        )}
+      </FadeUp>
+      <FadeUp at={22} style={{display: 'flex', alignItems: 'center', gap: 22, marginTop: L.fs(56, 80)}}>
+        <div style={{width: L.fs(76, 96), height: L.fs(76, 96), borderRadius: '50%', background: T.accent, color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SANS, fontWeight: 700, fontSize: L.fs(28, 36)}}>{initials}</div>
+        <div style={{textAlign: 'left'}}>
+          <div style={{fontFamily: SANS, fontWeight: 600, fontSize: L.fs(32, 40), color: T.fg}}>{p.name}</div>
+          <div style={{fontFamily: MONO, fontSize: L.fs(22, 28), color: T.muted, letterSpacing: 1, textTransform: 'uppercase', marginTop: 6}}>{p.role}</div>
+        </div>
+      </FadeUp>
+    </AbsoluteFill>
+  );
+};
+
 const CustomScene: React.FC<SceneProps> = (p) => {
   const C = CUSTOM[p.component];
   if (!C) throw new Error(`custom scene "${p.component}" is not registered in src/custom/index.ts`);
@@ -501,5 +570,7 @@ export const SCENES: Record<string, React.FC<SceneProps>> = {
   bullets: BulletsScene,
   cheatsheet: CheatsheetScene,
   outro: OutroScene,
+  stats: StatsScene,
+  quote: QuoteScene,
   custom: CustomScene,
 };

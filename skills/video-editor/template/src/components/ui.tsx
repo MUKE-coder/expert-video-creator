@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, random, useCurrentFrame} from 'remotion';
-import {MONO, SANS, T} from '../lib/theme';
+import {HW, MONO, SANS, T} from '../lib/theme';
 import {tween, useEnter, useLayout} from '../lib/anim';
 
 const rgba = (hex: string, a: number) => {
@@ -27,7 +27,7 @@ export const Backdrop: React.FC = () => {
           <AbsoluteFill
             style={{
               background: `radial-gradient(ellipse 50% 35% at 50% 0%, ${
-                T.accent.toUpperCase() === '#FFFFFF' || !T.dark ? rgba(T.fg, 0.1) : rgba(T.accent, 0.22)
+                T.accent.toUpperCase() === '#FFFFFF' ? rgba(T.fg, 0.1) : rgba(T.accent, T.dark ? 0.22 : 0.14)
               }, transparent 70%)`,
             }}
           />
@@ -62,15 +62,23 @@ export const FadeUp: React.FC<{at: number; children: React.ReactNode; style?: Re
   return <div style={{opacity: Math.min(1, p), translate: `0 ${(1 - p) * dist}px`, ...style}}>{children}</div>;
 };
 
-/** Underline that draws in under a key phrase. */
+/** Key phrase highlight: brand-gradient text that sweeps in (theme.gradient), or an underline that draws in. */
 export const Mark: React.FC<{at: number; children: React.ReactNode}> = ({at, children}) => {
   const f = useCurrentFrame();
   const w = tween(f, at, at + 14, 0, 100);
-  const c = T.accent;
+  if (T.gradient && T.gradient.length > 1) {
+    const g = `linear-gradient(90deg, ${T.gradient.join(', ')})`;
+    return (
+      <span style={{position: 'relative', display: 'inline-block'}}>
+        <span style={{color: T.fg}}>{children}</span>
+        <span style={{position: 'absolute', inset: 0, backgroundImage: g, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', clipPath: `inset(-20% ${100 - w}% -20% 0)`}}>{children}</span>
+      </span>
+    );
+  }
   return (
     <span style={{position: 'relative', display: 'inline-block', color: T.dark ? '#FFFFFF' : T.fg}}>
       {children}
-      <span style={{position: 'absolute', left: 0, bottom: -6, height: 4, width: `${w}%`, background: c, borderRadius: 2}} />
+      <span style={{position: 'absolute', left: 0, bottom: -6, height: 4, width: `${w}%`, background: T.accent, borderRadius: 2}} />
     </span>
   );
 };
@@ -133,7 +141,7 @@ export const Question: React.FC<{n?: number | string; text: string; liftAt: numb
       <div
         style={{
           fontFamily: SANS,
-          fontWeight: 600,
+          fontWeight: HW,
           fontSize: interpolate(lift, [0, 1], [big, small]),
           letterSpacing: '-0.04em',
           color: g > 0.5 ? T.muted : T.fg,
@@ -155,7 +163,7 @@ export const Answer: React.FC<{at: number; top: number; text: string; highlight?
   const parts = highlight && text.includes(highlight) ? text.split(highlight) : [text];
   return (
     <div style={{position: 'absolute', left: L.margin, right: L.margin, top, textAlign: 'center'}}>
-      <FadeUp at={at} style={{fontFamily: SANS, fontWeight: 600, fontSize: size ?? L.fs(88, 76), letterSpacing: '-0.045em', color: T.fg, lineHeight: 1.12, textWrap: 'balance'} as React.CSSProperties}>
+      <FadeUp at={at} style={{fontFamily: SANS, fontWeight: HW, fontSize: size ?? L.fs(88, 76), letterSpacing: '-0.045em', color: T.fg, lineHeight: 1.12, textWrap: 'balance'} as React.CSSProperties}>
         {parts.length === 2 ? (
           <>
             {parts[0]}

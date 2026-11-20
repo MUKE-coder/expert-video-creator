@@ -18,6 +18,10 @@ export type Theme = {
   motion: 'calm' | 'springy' | 'fast';
   dark: boolean;
   fontFiles?: {sans?: string; mono?: string};
+  /** brand gradient for highlighted words, e.g. ["#0052E0", "#0070F3", "#00C2FF"]; underline highlight when absent */
+  gradient?: string[];
+  /** weight for headlines/answers (Geist looks right at 600; display faces like Onest at 800) */
+  headlineWeight?: number;
   syntax: {cmd: string; flag: string; str: string; type: string; op: string; kw: string; comment: string; dir: string; ok: string};
 };
 
@@ -46,5 +50,6 @@ loadFont({family: 'Geist Mono', url: staticFile('fonts/GeistMono-Variable.woff2'
 if (T.fontFiles?.sans) loadFont({family: T.fontSans, url: staticFile(T.fontFiles.sans), weight: '100 900'});
 if (T.fontFiles?.mono) loadFont({family: T.fontMono, url: staticFile(T.fontFiles.mono), weight: '100 900'});
 
+export const HW = T.headlineWeight ?? 600;
 export const SANS = `"${T.fontSans}", Geist, sans-serif`;
 export const MONO = `"${T.fontMono}", "Geist Mono", monospace`;

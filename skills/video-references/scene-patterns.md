@@ -14,6 +14,8 @@ terms so the editor can build most of a video from data alone.
 | `flow` | 2–4 captures in sequence with a cursor/click between them (a user journey) | 3 s per step | `steps[] {src, focus, label}` |
 | `schema` | Tables/entities with fields and a drawn relation line | 6–7 s | `tables[], relations[]` |
 | `bullets` | Up to 4 short points, staggered | 4–6 s | `title, items[]` |
+| `stats` | Big numbers that count up (brand gradient) | 6–7 s | `title, items[] {value, prefix, suffix, label}` |
+| `quote` | Client testimonial with highlighted phrase, initials avatar | 5–6 s | `quote, highlight, name, role` |
 | `cheatsheet` | Commands with `# comments` in a window | 4–5 s | `rows[] {cmd, note}` |
 | `outro` | Wordmark, tagline, highlighted install command, URL pill | 3–6 s | `title, tagline, cta, url, logo` |
 
